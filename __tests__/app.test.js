@@ -15,7 +15,7 @@ afterAll(() => {
 
 describe("/api", () => {
   describe("GET: status: 200", () => {
-    test.only("responds with an array of available endpoints", () => {
+    test("responds with an array of available endpoints", () => {
       const expectedResponse = endpoints;
       return request(app)
         .get('/api')
