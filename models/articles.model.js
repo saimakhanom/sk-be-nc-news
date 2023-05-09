@@ -12,7 +12,7 @@ exports.fetchArticle = (articleId) => {
     .then((response) => {
       if (response.rows.length === 0) {
         return Promise.reject({
-          status: 400,
+          status: 404,
           message: "This article doesn't exist",
         });
         } else {

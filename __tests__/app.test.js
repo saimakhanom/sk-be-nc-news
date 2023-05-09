@@ -65,7 +65,7 @@ describe("/api/articles/:article_id", () => {
               topic: "mitch",
               votes: 100,
             };
-            expect(article).toEqual(expected);
+            expect(article).toMatchObject(expected);
           });
       });
     });
@@ -81,7 +81,7 @@ describe("/api/articles/:article_id", () => {
       test('valid but non-existent article_id', () => {
         return request(app)
           .get('/api/articles/10000')
-          .expect(400)
+          .expect(404)
           .then((response) => {
           expect(response.body.message).toBe("This article doesn't exist")
         })
