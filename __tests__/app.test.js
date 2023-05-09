@@ -45,7 +45,7 @@ describe("/api/topics", () => {
   });
 });
 
-describe.only("/api/articles/:article_id", () => {
+describe("/api/articles/:article_id", () => {
   describe("GET:", () => {
     describe("status: 200", () => {
       test("responds with article object", () => {
