@@ -35,12 +35,12 @@ describe("/api/topics", () => {
         .expect(200)
         .then((response) => {
           const topics = response.body.topics;
-          if (topics.length > 0) {
+            expect(topics.length).toBe(3)
             topics.forEach((topic) => {
               expect(topic).toHaveProperty("description");
               expect(topic).toHaveProperty("slug");
             });
-          }
+          
         });
     });
   });
