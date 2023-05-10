@@ -7,7 +7,7 @@ exports.checkTopicExists = (topic) => {
     .then((result) => {
         if (result.rows.length === 0 && topic) {
             return Promise.reject({
-                status: 400,
+                status: 404,
                 message: "This topic doesn't exist",
             });
         }
@@ -20,7 +20,7 @@ exports.checkAuthorExists = (author) => {
     .then((result) => {
         if (result.rows.length === 0 && author) {
         return Promise.reject({
-          status: 400,
+          status: 404,
           message: "This author doesn't exist",
         });
       } else return Promise.resolve()

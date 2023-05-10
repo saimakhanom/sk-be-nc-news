@@ -99,6 +99,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
+            expect(articles.length).toBe(12)
             articles.forEach((article) => {
               expect(article).toHaveProperty("author");
               expect(article).toHaveProperty("title");
@@ -107,6 +108,7 @@ describe("/api/articles", () => {
               expect(article).toHaveProperty("created_at");
               expect(article).toHaveProperty("votes");
               expect(article).toHaveProperty("article_img_url");
+              expect(article).toHaveProperty("comment_count");
             });
           });
       });
@@ -150,6 +152,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
+            expect(articles.length).toBe(12)
             articles.forEach((article) => {
               expect(article).not.toHaveProperty("body");
             });
@@ -252,7 +255,7 @@ describe("/api/articles", () => {
       test("invalid author query", () => {
         return request(app)
           .get("/api/articles?author=nonsense")
-          .expect(400)
+          .expect(404)
           .then((result) => {
             expect(result.body.message).toBe("This author doesn't exist");
           });
@@ -261,7 +264,7 @@ describe("/api/articles", () => {
       test("invalid topic query", () => {
         return request(app)
           .get("/api/articles?topic=nonsense")
-          .expect(400)
+          .expect(404)
           .then((result) => {
             expect(result.body.message).toBe("This topic doesn't exist");
           });
