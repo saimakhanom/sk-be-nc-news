@@ -69,22 +69,205 @@ describe("/api/articles/:article_id", () => {
           });
       });
     });
-    describe('status: 400', () => {
-      test('invalid article_id', () => {
+    describe("status: 400", () => {
+      test("invalid article_id", () => {
         return request(app)
-          .get('/api/articles/nonsense')
+          .get("/api/articles/nonsense")
           .expect(400)
           .then((response) => {
-          expect(response.body.message).toBe("Bad request")
-        })
+            expect(response.body.message).toBe("Bad request");
+          });
       });
-      test('valid but non-existent article_id', () => {
+      test("valid but non-existent article_id", () => {
         return request(app)
-          .get('/api/articles/10000')
+          .get("/api/articles/10000")
           .expect(404)
           .then((response) => {
-          expect(response.body.message).toBe("This article doesn't exist")
-        })
+            expect(response.body.message).toBe("This article doesn't exist");
+          });
+      });
+    });
+  });
+});
+
+describe("/api/articles", () => {
+  describe("GET: ", () => {
+    describe("status: 200", () => {
+      test("responds with an array of articles", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then((result) => {
+            const articles = result.body.articles;
+            expect(articles.length).toBe(12)
+            articles.forEach((article) => {
+              expect(article).toHaveProperty("author");
+              expect(article).toHaveProperty("title");
+              expect(article).toHaveProperty("article_id");
+              expect(article).toHaveProperty("topic");
+              expect(article).toHaveProperty("created_at");
+              expect(article).toHaveProperty("votes");
+              expect(article).toHaveProperty("article_img_url");
+              expect(article).toHaveProperty("comment_count");
+            });
+          });
+      });
+
+      test("articles are sorted by date in descending order by default", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then((result) => {
+            const articles = result.body.articles;
+            expect(articles).toBeSortedBy("created_at", {
+              descending: true,
+            });
+          });
+      });
+
+      test("articles include an accurate comment_count", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then((result) => {
+            const articles = result.body.articles;
+            const article1 = articles.find((article) => {
+              return article.article_id === 1;
+            });
+            const article2 = articles.find((article) => {
+              return article.article_id === 2;
+            });
+            const article3 = articles.find((article) => {
+              return article.article_id === 3;
+            });
+            expect(article1.comment_count).toBe(11);
+            expect(article2.comment_count).toBe(0);
+            expect(article3.comment_count).toBe(2);
+          });
+      });
+
+      test("articles do not include a body property", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then((result) => {
+            const articles = result.body.articles;
+            expect(articles.length).toBe(12)
+            articles.forEach((article) => {
+              expect(article).not.toHaveProperty("body");
+            });
+          });
+      });
+
+      describe("query by: ", () => {
+        test("author", () => {
+          return request(app)
+            .get("/api/articles?author=butter_bridge")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles.length).toBe(3);
+              articles.forEach((article) => {
+                expect(article.author).toBe("butter_bridge");
+              });
+            });
+        });
+
+        test("topic", () => {
+          return request(app)
+            .get("/api/articles?topic=mitch")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles.length).toBe(11);
+              articles.forEach((article) => {
+                expect(article.topic).toBe("mitch");
+              });
+            });
+        });
+
+        test("sort_by", () => {
+          return request(app)
+            .get("/api/articles?sort_by=author")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles).toBeSortedBy("author", { descending: true });
+            });
+        });
+
+        test("order", () => {
+          return request(app)
+            .get("/api/articles?order=asc")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles).toBeSortedBy("created_at", {
+                descending: false,
+              });
+            });
+        });
+
+        test("author & topic", () => {
+          return request(app)
+            .get("/api/articles?author=butter_bridge&topic=mitch")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles.length).toBe(3);
+              articles.forEach((article) => {
+                expect(article.topic).toBe("mitch");
+                expect(article.author).toBe("butter_bridge");
+              });
+            });
+        });
+
+        test("topic which exists but has no articles", () => {
+          return request(app)
+            .get("/api/articles?topic=paper")
+            .expect(200)
+            .then((result) => {
+              const articles = result.body.articles;
+              expect(articles.length).toBe(0);
+            });
+        });
+      });
+    });
+    describe("status: 400", () => {
+      test("invalid sort_by query", () => {
+        return request(app)
+          .get("/api/articles?sort_by=nonsense")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Invalid sort query");
+          });
+      });
+
+      test("invalid order query", () => {
+        return request(app)
+          .get("/api/articles?order=nonsense")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Invalid order query");
+          });
+      });
+
+      test("invalid author query", () => {
+        return request(app)
+          .get("/api/articles?author=nonsense")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This author doesn't exist");
+          });
+      });
+
+      test("invalid topic query", () => {
+        return request(app)
+          .get("/api/articles?topic=nonsense")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This topic doesn't exist");
+          });
       });
     });
   });

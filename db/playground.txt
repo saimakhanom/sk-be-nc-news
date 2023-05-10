@@ -1,0 +1,12 @@
+
+> be-nc-news@1.0.0 playground
+> psql -f ./db/playground.sql
+
+You are now connected to database "nc_news" as user "saimakhanom".
+   slug   |               description               
+----------+-----------------------------------------
+ coding   | Code is love, code is life
+ football | FOOTIE!
+ cooking  | Hey good looking, what you got cooking?
+(3 rows)
+
