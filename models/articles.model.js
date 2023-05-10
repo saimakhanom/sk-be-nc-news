@@ -2,7 +2,7 @@ const db = require("../db/connection");
 const {
   checkAuthorExists,
   checkTopicExists,
-} = require("../utils.js/articles.utils");
+} = require("../utils/articles.utils");
 
 exports.fetchArticle = (articleId) => {
   return db
