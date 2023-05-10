@@ -9,7 +9,7 @@
     "test": "jest",
     "prepare": "husky install",
     "dev": "nodemon listen.js",
-    "playground": "psql -f ./db/playground.sql"
+    "playground": "psql -f ./db/playground.sql > ./db/playground.txt"
   },
   "repository": {
     "type": "git",
