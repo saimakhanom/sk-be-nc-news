@@ -392,6 +392,28 @@ describe("/api/articles/:article_id/comments", () => {
             expect(response).toMatchObject(expectedResponse);
           });
       });
+      test('additional properties in req body are ignored', () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({
+            username: "icellusedkars",
+            body: "This is the best comment ever written!",
+            test: 'a test property'
+          })
+          .expect(201)
+          .then((result) => {
+            const response = result.body.comment
+            const expectedResponse = {
+              comment_id: 19,
+              body: "This is the best comment ever written!",
+              article_id: 2,
+              votes: 0,
+              author: "icellusedkars",
+            };
+            expect(response).toHaveProperty("created_at")
+            expect(response).toMatchObject(expectedResponse);
+          });
+      });
     });
 
     describe("status: 404", () => {
