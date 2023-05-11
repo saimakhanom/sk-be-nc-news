@@ -99,7 +99,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
-            expect(articles.length).toBe(12)
+            expect(articles.length).toBe(12);
             articles.forEach((article) => {
               expect(article).toHaveProperty("author");
               expect(article).toHaveProperty("title");
@@ -152,7 +152,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
-            expect(articles.length).toBe(12)
+            expect(articles.length).toBe(12);
             articles.forEach((article) => {
               expect(article).not.toHaveProperty("body");
             });
@@ -269,6 +269,72 @@ describe("/api/articles", () => {
             expect(result.body.message).toBe("This topic doesn't exist");
           });
       });
+    });
+  });
+});
+
+describe("POST:", () => {
+  describe("status: 201", () => {
+    test("responds with the posted comment", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({
+          username: "sk",
+          body: "This is the best comment ever written!",
+        })
+        .expect(201)
+        .then((result) => {
+          const expectedResponse = {
+            comment_id: 19,
+            body: "This is the best comment ever written!",
+            article_id: 2,
+            votes: 0,
+            author: "sk",
+          };
+          expect(result.body.comment).toMatchObject(expectedResponse);
+        });
+    });
+  });
+
+  describe("status: 404", () => {
+    test("valid but non-existent article_id", () => {
+      return request(app)
+        .post("/api/articles/nonsense/comments")
+        .send({
+          username: "sk",
+          body: "This is the best comment ever written!",
+        })
+        .expect(404)
+        .then((result) => {
+          expect(result.body.message).toBe("This article doesn't exist");
+        });
+    });
+  });
+
+  describe("status 400", () => {
+    test("request body missing required properties", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({
+          username: "sk",
+        })
+        .expect(400)
+        .then((result) => {
+          expect(result.body.message).toBe("Bad request");
+        });
+    });
+
+    test("invalid article_id", () => {
+      return request(app)
+        .post("/api/articles/nonsense/comments")
+        .send({
+          username: "sk",
+          body: "This is the best comment ever written!",
+        })
+        .expect(400)
+        .then((result) => {
+          expect(result.body.message).toBe("Bad request");
+        });
     });
   });
 });
