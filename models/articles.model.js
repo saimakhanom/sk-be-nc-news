@@ -3,7 +3,9 @@ const {
   checkAuthorExists,
   checkTopicExists,
   checkArticleExists,
-} = require("../utils/articles.utils");
+  } = require("../utils/articles.utils");
+const format = require('pg-format');
+const { createRef, formatComments } = require("../utils/seed.utils");
 
 exports.fetchArticle = (articleId) => {
   return db
@@ -90,8 +92,11 @@ exports.fetchAllArticles = (
   );
 };
 
-exports.fetchCommentsForArticle = (articleId, sortBy = 'created_at', order = 'desc') => {
-  
+exports.fetchCommentsForArticle = (
+  articleId,
+  sortBy = "created_at",
+  order = "desc"
+) => {
   const validSorts = ["created_at", "votes", "author", "article_id"];
   if (!validSorts.includes(sortBy)) {
     return Promise.reject({ status: 400, message: "Invalid sort query" });
@@ -103,8 +108,56 @@ exports.fetchCommentsForArticle = (articleId, sortBy = 'created_at', order = 'de
 
   return Promise.all([
     checkArticle,
-    db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY ${sortBy} ${order}`, [articleId]),
+    db.query(
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY ${sortBy} ${order}`,
+      [articleId]
+    ),
   ]).then((result) => {
     return result[1].rows;
   });
+};
+
+
+
+
+
+
+
+exports.postComment = (reqBody, articleId) => {
+  if (!reqBody.username || !reqBody.body) {
+    return Promise.reject({code: '22P02'})
+  }
+
+  const checkArticle = checkArticleExists(articleId)
+  const queryPromise = db.query(`SELECT * FROM articles;`).then(({ rows: articleRows }) => {
+
+    reqBody.created_at = Date.now();
+    reqBody.article_id = articleId;
+    reqBody.author = reqBody.username;
+
+    const articleIdLookup = createRef(articleRows, "title", "article_id");
+        const formattedCommentData = formatComments([reqBody], articleIdLookup);
+        const insertCommentsQueryStr = format(
+          "INSERT INTO comments (body, author, article_id, votes, created_at) VALUES %L RETURNING *;",
+          formattedCommentData.map(
+            ({ body, author, article_id, votes = 0, created_at }) => [
+              body,
+              author,
+              article_id,
+              votes,
+              created_at,
+            ]
+          )
+        );
+  
+    return db.query(insertCommentsQueryStr).then((result) => {
+      return result.rows[0];
+    });
+    
+  })
+  
+  return Promise.all([checkArticle, queryPromise]).then((result) => {
+   return result[1]
+  })
+
 };
