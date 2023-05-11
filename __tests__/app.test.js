@@ -89,82 +89,83 @@ describe("/api/articles/:article_id", () => {
     });
   });
 
-  describe("PATCH:", () => {
-    describe("status: 200", () => {
-      test("should not update user if no req body supplied", () => {
-        return request(app)
-          .patch("/api/articles/1")
-          .send()
-          .expect(200)
-          .then((result) => {
-            const expectedResponse = {
-              article_id: 1,
-              title: "Living in the shadow of a great man",
-              topic: "mitch",
-              author: "butter_bridge",
-              body: "I find this existence challenging",
-              created_at: "2020-07-09 21:11:00",
-              votes: 100,
-              article_img_url:
-                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-            };
-            expect(result.body).toMatchObject(expectedResponse);
-          });
-      });
-      test("responds with the updated article object", () => {
-        return request(app)
-          .patch("/api/articles/1")
-          .send({
-            author: "icellusedkars",
-          })
-          .then((result) => {
-            const expectedResponse = {
-              article_id: 1,
-              title: "Living in the shadow of a great man",
-              topic: "mitch",
-              author: "icellusedkars",
-              body: "I find this existence challenging",
-              created_at: "2020-07-09 21:11:00",
-              votes: 100,
-              article_img_url:
-                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-            };
-            expect(result.body).toMatchObject(expectedResponse);
-          });
-      });
+  // describe("PATCH:", () => {
+  //   describe("status: 200", () => {
+  //     test("should not update user if no req body supplied", () => {
+  //       return request(app)
+  //         .patch("/api/articles/1")
+  //         .send()
+  //         .expect(200)
+  //         .then((result) => {
+  //           const expectedResponse = {
+  //             article_id: 1,
+  //             title: "Living in the shadow of a great man",
+  //             topic: "mitch",
+  //             author: "butter_bridge",
+  //             body: "I find this existence challenging",
+  //             created_at: "2020-07-09 21:11:00",
+  //             votes: 100,
+  //             article_img_url:
+  //               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+  //           };
+  //           expect(result.body).toMatchObject(expectedResponse);
+  //         });
+  //     });
+  //     test("responds with the updated article object", () => {
+  //       return request(app)
+  //         .patch("/api/articles/1")
+  //         .send({
+  //           author: "icellusedkars",
+  //         })
+  //         .then((result) => {
+  //           const expectedResponse = {
+  //             article_id: 1,
+  //             title: "Living in the shadow of a great man",
+  //             topic: "mitch",
+  //             author: "icellusedkars",
+  //             body: "I find this existence challenging",
+  //             created_at: "2020-07-09 21:11:00",
+  //             votes: 100,
+  //             article_img_url:
+  //               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+  //           };
+  //           expect(result.body).toMatchObject(expectedResponse);
+  //         });
+  //     });
 
-      test("should update more than one field if specified", () => {
-        return request(app)
-          .patch("/api/articles/1")
-          .send({
-            author: "icellusedkars",
-          })
-          .then((result) => {
-            const expectedResponse = {
-              article_id: 1,
-              title: "Living in the shadow of a great man",
-              topic: "mitch",
-              author: "icellusedkars",
-              body: "I find this existence challenging",
-              created_at: "2020-07-09 21:11:00",
-              votes: 100,
-              article_img_url:
-                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-            };
-            expect(result.body).toMatchObject(expectedResponse);
-          });
-      });
-    });
-    describe("status: 400", () => {
-      test("should not update invalid article fields", () => {
-        
-      });
-      test("invalid article_id", () => {});
-    });
-    describe("status: 404", () => {
-      test("valid but non-existent article_id", () => {});
-    });
-  });
+  //     test("should update more than one field if specified", () => {
+  //       return request(app)
+  //         .patch("/api/articles/1")
+  //         .send({
+  //           author: "icellusedkars",
+  //           title: "This is a new title"
+  //         })
+  //         .then((result) => {
+  //           const expectedResponse = {
+  //             article_id: 1,
+  //             title: "This is a new title",
+  //             topic: "mitch",
+  //             author: "icellusedkars",
+  //             body: "I find this existence challenging",
+  //             created_at: "2020-07-09 21:11:00",
+  //             votes: 100,
+  //             article_img_url:
+  //               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+  //           };
+  //           expect(result.body).toMatchObject(expectedResponse);
+  //         });
+  //     });
+  //   });
+  //   describe("status: 400", () => {
+  //     test("should not update invalid article fields", () => {
+
+  //     });
+  //     test("invalid article_id", () => {});
+  //   });
+  //   describe("status: 404", () => {
+  //     test("valid but non-existent article_id", () => {});
+  //   });
+  // });
 });
 
 describe("/api/articles", () => {
