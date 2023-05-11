@@ -283,6 +283,8 @@ describe("/api/articles/:article_id/comments", () => {
           .expect(200)
           .then((result) => {
             const comments = result.body.comments;
+            expect(comments[0].article_id).toBe(3)
+            expect(comments[1].article_id).toBe(3)
             expect(comments.length).toBe(2);
           });
       });
@@ -294,6 +296,7 @@ describe("/api/articles/:article_id/comments", () => {
           .then((result) => {
             const comments = result.body.comments;
             comments.forEach((comment) => {
+              expect(comment.article_id).toBe(3)
               expect(comment).toHaveProperty("comment_id");
               expect(comment).toHaveProperty("votes");
               expect(comment).toHaveProperty("created_at");
@@ -350,7 +353,6 @@ describe("/api/articles/:article_id/comments", () => {
           .get("/api/articles/nonsense/comments")
           .expect(400)
           .then((result) => {
-            console.log(result.body.message)
             expect(result.body.message).toBe("Bad request");
           });
       });
