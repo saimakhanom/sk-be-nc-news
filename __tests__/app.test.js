@@ -476,4 +476,94 @@ describe("/api/articles/:article_id/comments", () => {
       });
     });
   });
+
+  describe("POST:", () => {
+    describe("status: 201", () => {
+      test("responds with the posted comment", () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({
+            username: "icellusedkars",
+            body: "This is the best comment ever written!",
+          })
+          .expect(201)
+          .then((result) => {
+            const response = result.body.comment
+            const expectedResponse = {
+              comment_id: 19,
+              body: "This is the best comment ever written!",
+              article_id: 2,
+              votes: 0,
+              author: "icellusedkars",
+            };
+            expect(response).toHaveProperty("created_at")
+            expect(response).toMatchObject(expectedResponse);
+          });
+      });
+      test('additional properties in req body are ignored', () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({
+            username: "icellusedkars",
+            body: "This is the best comment ever written!",
+            test: 'a test property'
+          })
+          .expect(201)
+          .then((result) => {
+            const response = result.body.comment
+            const expectedResponse = {
+              comment_id: 19,
+              body: "This is the best comment ever written!",
+              article_id: 2,
+              votes: 0,
+              author: "icellusedkars",
+            };
+            expect(response).toHaveProperty("created_at")
+            expect(response).toMatchObject(expectedResponse);
+          });
+      });
+    });
+
+    describe("status: 404", () => {
+      test("valid but non-existent article_id", () => {
+        return request(app)
+          .post("/api/articles/9000/comments")
+          .send({
+            username: "icellusedkars",
+            body: "This is the best comment ever written!",
+          })
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This article doesn't exist");
+          });
+      });
+    });
+
+    describe("status 400", () => {
+      test("request body missing required properties", () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({
+            username: "icellusedkars",
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+
+      test("invalid article_id", () => {
+        return request(app)
+          .post("/api/articles/nonsense/comments")
+          .send({
+            username: "icellusedkars",
+            body: "This is the best comment ever written!",
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+  });
 });

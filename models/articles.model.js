@@ -4,7 +4,8 @@ const {
   checkTopicExists,
   checkArticleExists,
 } = require("../utils/articles.utils");
-const format = require('pg-format')
+const format = require('pg-format');
+const { createRef, formatComments } = require("../utils/seed.utils");
 
 exports.fetchArticle = (articleId) => {
   return db
@@ -144,3 +145,47 @@ exports.updateArticle = (articleId, propertiesToUpdate) => {
 `UPDATE articles
 SET column1 = value1, column2 = value2, ...
 WHERE article_id = [$ articleId];`;
+
+
+
+
+
+
+exports.postComment = (reqBody, articleId) => {
+  if (!reqBody.username || !reqBody.body) {
+    return Promise.reject({code: '22P02'})
+  }
+
+  const checkArticle = checkArticleExists(articleId)
+  const queryPromise = db.query(`SELECT * FROM articles;`).then(({ rows: articleRows }) => {
+
+    reqBody.created_at = Date.now();
+    reqBody.article_id = articleId;
+    reqBody.author = reqBody.username;
+
+    const articleIdLookup = createRef(articleRows, "title", "article_id");
+        const formattedCommentData = formatComments([reqBody], articleIdLookup);
+        const insertCommentsQueryStr = format(
+          "INSERT INTO comments (body, author, article_id, votes, created_at) VALUES %L RETURNING *;",
+          formattedCommentData.map(
+            ({ body, author, article_id, votes = 0, created_at }) => [
+              body,
+              author,
+              article_id,
+              votes,
+              created_at,
+            ]
+          )
+        );
+  
+    return db.query(insertCommentsQueryStr).then((result) => {
+      return result.rows[0];
+    });
+    
+  })
+  
+  return Promise.all([checkArticle, queryPromise]).then((result) => {
+   return result[1]
+  })
+
+};

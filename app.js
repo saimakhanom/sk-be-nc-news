@@ -1,9 +1,10 @@
 const express = require("express");
 const { getAllTopics } = require("./controllers/topics.controllers");
 const { getEndpoints } = require("./controllers/app.controller");
-const { getArticle, getAllArticles, getCommentsForArticle, patchArticle } = require("./controllers/articles.controller");
+const { getArticle, getAllArticles, getCommentsForArticle, postCommentForArticle, patchArticle } = require("./controllers/articles.controller");
 
 const app = express();
+app.use(express.json())
 
 //GET
 app.get("/api", getEndpoints);
@@ -12,10 +13,9 @@ app.get('/api/articles', getAllArticles)
 app.get("/api/articles/:article_id", getArticle);
 app.get('/api/articles/:article_id/comments', getCommentsForArticle)
 
+app.post('/api/articles/:article_id/comments', postCommentForArticle)
 
-//PATCH
-app.patch('/api/articles/:article_id', patchArticle)
-
+app.patch('api/articles/:article_id', patchArticle)
 
 // error handlers
 app.use((err, req, res, next) => {
@@ -35,7 +35,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log({err})
+  // console.log({err})
   res.status(500).send({ message: "Server error!" });
 });
 
