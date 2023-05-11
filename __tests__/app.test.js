@@ -380,7 +380,7 @@ describe("/api/articles/:article_id/comments", () => {
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment
+            const response = result.body.comment;
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -388,21 +388,21 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at")
+            expect(response).toHaveProperty("created_at");
             expect(response).toMatchObject(expectedResponse);
           });
       });
-      test('additional properties in req body are ignored', () => {
+      test("additional properties in req body are ignored", () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({
             username: "icellusedkars",
             body: "This is the best comment ever written!",
-            test: 'a test property'
+            test: "a test property",
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment
+            const response = result.body.comment;
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -410,7 +410,7 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at")
+            expect(response).toHaveProperty("created_at");
             expect(response).toMatchObject(expectedResponse);
           });
       });
@@ -454,6 +454,38 @@ describe("/api/articles/:article_id/comments", () => {
           .expect(400)
           .then((result) => {
             expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+  });
+});
+
+describe("/api/comments/:comment_id", () => {
+  describe("DELETE:", () => {
+    describe("status: 204", () => {
+      test("deletes comment by given comment_id", () => {
+        return request(app).delete("/api/comments/1").expect(204);
+      });
+    });
+
+    describe("status: 400", () => {
+      test("invalid comment_id", () => {
+        return request(app)
+          .delete("/api/comments/nonsense")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+
+    describe("status: 404", () => {
+      test("valid but non-existent comment_id", () => {
+        return request(app)
+          .delete("/api/comments/1000")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This comment doesn't exist");
           });
       });
     });
