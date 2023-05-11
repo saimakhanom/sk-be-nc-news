@@ -99,7 +99,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
-            expect(articles.length).toBe(12)
+            expect(articles.length).toBe(12);
             articles.forEach((article) => {
               expect(article).toHaveProperty("author");
               expect(article).toHaveProperty("title");
@@ -152,7 +152,7 @@ describe("/api/articles", () => {
           .expect(200)
           .then((result) => {
             const articles = result.body.articles;
-            expect(articles.length).toBe(12)
+            expect(articles.length).toBe(12);
             articles.forEach((article) => {
               expect(article).not.toHaveProperty("body");
             });
@@ -251,7 +251,8 @@ describe("/api/articles", () => {
             expect(result.body.message).toBe("Invalid order query");
           });
       });
-
+    });
+    describe("status: 404", () => {
       test("invalid author query", () => {
         return request(app)
           .get("/api/articles?author=nonsense")
@@ -267,6 +268,102 @@ describe("/api/articles", () => {
           .expect(404)
           .then((result) => {
             expect(result.body.message).toBe("This topic doesn't exist");
+          });
+      });
+    });
+  });
+});
+
+describe("/api/articles/:article_id/comments", () => {
+  describe("GET:", () => {
+    describe("status: 200", () => {
+      test("responds with array of comments for specified article", () => {
+        return request(app)
+          .get("/api/articles/3/comments")
+          .expect(200)
+          .then((result) => {
+            const comments = result.body.comments;
+            expect(comments[0].article_id).toBe(3)
+            expect(comments[1].article_id).toBe(3)
+            expect(comments.length).toBe(2);
+          });
+      });
+
+      test("each comment object has required properties", () => {
+        return request(app)
+          .get("/api/articles/3/comments")
+          .expect(200)
+          .then((result) => {
+            const comments = result.body.comments;
+            comments.forEach((comment) => {
+              expect(comment.article_id).toBe(3)
+              expect(comment).toHaveProperty("comment_id");
+              expect(comment).toHaveProperty("votes");
+              expect(comment).toHaveProperty("created_at");
+              expect(comment).toHaveProperty("author");
+              expect(comment).toHaveProperty("body");
+              expect(comment).toHaveProperty("article_id");
+            });
+          });
+      });
+
+      test("comments are sorted by date in descending order by default", () => {
+        return request(app)
+          .get("/api/articles/3/comments")
+          .expect(200)
+          .then((result) => {
+            const comments = result.body.comments;
+            expect(comments).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+      test("article exists but has no comments", () => {
+        return request(app)
+          .get("/api/articles/2/comments")
+          .expect(200)
+          .then((result) => {
+            const comments = result.body.comments;
+            expect(comments.length).toBe(0);
+          });
+      });
+      describe("query by:", () => {
+        test("sort_by", () => {
+          return request(app)
+            .get("/api/articles/3/comments?sort_by=votes")
+            .expect(200)
+            .then((result) => {
+              const comments = result.body.comments;
+              expect(comments).toBeSortedBy("votes");
+            });
+        });
+        test("order", () => {
+          return request(app)
+            .get("/api/articles/3/comments?order=asc")
+            .expect(200)
+            .then((result) => {
+              const comments = result.body.comments;
+              expect(comments).toBeSortedBy("created_at");
+            });
+        });
+      });
+    });
+
+    describe("status: 400", () => {
+      test("invalid artical id", () => {
+        return request(app)
+          .get("/api/articles/nonsense/comments")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+    describe('status: 404', () => {
+      test("valid but non-existent article_id", () => {
+        return request(app)
+          .get("/api/articles/3000/comments")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This article doesn't exist");
           });
       });
     });

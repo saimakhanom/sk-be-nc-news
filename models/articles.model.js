@@ -2,6 +2,7 @@ const db = require("../db/connection");
 const {
   checkAuthorExists,
   checkTopicExists,
+  checkArticleExists,
 } = require("../utils/articles.utils");
 
 exports.fetchArticle = (articleId) => {
@@ -87,4 +88,23 @@ exports.fetchAllArticles = (
       return result[2];
     }
   );
+};
+
+exports.fetchCommentsForArticle = (articleId, sortBy = 'created_at', order = 'desc') => {
+  
+  const validSorts = ["created_at", "votes", "author", "article_id"];
+  if (!validSorts.includes(sortBy)) {
+    return Promise.reject({ status: 400, message: "Invalid sort query" });
+  } else if (order !== "asc" && order !== "desc") {
+    return Promise.reject({ status: 400, message: "Invalid order query" });
+  }
+
+  const checkArticle = checkArticleExists(articleId);
+
+  return Promise.all([
+    checkArticle,
+    db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY ${sortBy} ${order}`, [articleId]),
+  ]).then((result) => {
+    return result[1].rows;
+  });
 };
