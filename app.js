@@ -6,16 +6,18 @@ const { getArticle, getAllArticles, getCommentsForArticle, postCommentForArticle
 const app = express();
 app.use(express.json())
 
-//GET
+// GET
 app.get("/api", getEndpoints);
 app.get("/api/topics", getAllTopics);
 app.get('/api/articles', getAllArticles)
 app.get("/api/articles/:article_id", getArticle);
 app.get('/api/articles/:article_id/comments', getCommentsForArticle)
 
+// POST
 app.post('/api/articles/:article_id/comments', postCommentForArticle)
 
-app.patch('api/articles/:article_id', patchArticle)
+// PATCH
+app.patch('/api/articles/:article_id', patchArticle)
 
 // error handlers
 app.use((err, req, res, next) => {
@@ -35,7 +37,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  // console.log({err})
+  console.log({err})
   res.status(500).send({ message: "Server error!" });
 });
 
