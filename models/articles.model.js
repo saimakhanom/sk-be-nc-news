@@ -161,25 +161,31 @@ exports.updateArticle = (articleId, propertiesToUpdate) => {
   }
 
   const checkArticle = checkArticleExists(articleId)
-
   const queryPromise = db.query(`SELECT * FROM articles`)
-    .then((result) => {
-      const articleKeys = Object.keys(result.rows[0])
+  .then((result) => {
+    const articles = result.rows
+    const articleKeys = Object.keys(articles[0])
+      articleKeys.push('inc_votes')
       
       for (let key in propertiesToUpdate) {
         if (!articleKeys.includes(key)) {
           return Promise.reject({ code: "22P02" })
         }
       }
+      
+      if (Object.keys(propertiesToUpdate).includes('inc_votes')) {
+        const article = articles.find((article) => {
+          return article.article_id == articleId
+        })
+        propertiesToUpdate.votes = article.votes + propertiesToUpdate.inc_votes
+        delete propertiesToUpdate.inc_votes
+      }
 
-
-      // format object data for update
       let sets = [];
       for (let key in propertiesToUpdate) {
         sets.push(format(`%I = %L`, key, propertiesToUpdate[key]));
       }
       let setStrings = sets.join(",");
-    
       const query = format(
         `UPDATE articles SET %s WHERE article_id = %L RETURNING *;`,
         setStrings,
