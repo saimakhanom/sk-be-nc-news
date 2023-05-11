@@ -111,12 +111,13 @@ describe("/api/articles/:article_id", () => {
   //           expect(result.body).toMatchObject(expectedResponse);
   //         });
   //     });
-  //     test("responds with the updated article object", () => {
+  //     test.only("responds with the updated article object", () => {
   //       return request(app)
   //         .patch("/api/articles/1")
   //         .send({
   //           author: "icellusedkars",
   //         })
+  //         .expect(200)
   //         .then((result) => {
   //           const expectedResponse = {
   //             article_id: 1,
@@ -140,6 +141,7 @@ describe("/api/articles/:article_id", () => {
   //           author: "icellusedkars",
   //           title: "This is a new title"
   //         })
+  //         .expect(200)
   //         .then((result) => {
   //           const expectedResponse = {
   //             article_id: 1,
@@ -158,12 +160,40 @@ describe("/api/articles/:article_id", () => {
   //   });
   //   describe("status: 400", () => {
   //     test("should not update invalid article fields", () => {
-
+  //       return request(app)
+  //       .patch("/api/articles/1")
+  //       .send({
+  //         test: "test",
+  //       })
+  //       .expect(400)
+  //       .then((result) => {
+  //         expect(result.body.message).toBe('Bad request');
+  //       });
   //     });
-  //     test("invalid article_id", () => {});
+  //     test("invalid article_id", () => {
+  //       return request(app)
+  //       .patch("/api/articles/nonsense")
+  //       .send({
+  //         author: "icellusedkars"
+  //       })
+  //       .expect(400)
+  //       .then((result) => {
+  //         expect(result.body.message).toBe('Bad request');
+  //       });
+  //     });
   //   });
   //   describe("status: 404", () => {
-  //     test("valid but non-existent article_id", () => {});
+  //     test("valid but non-existent article_id", () => {
+  //       return request(app)
+  //       .patch("/api/articles/nonsense")
+  //       .send({
+  //         author: "icellusedkars"
+  //       })
+  //       .expect(400)
+  //       .then((result) => {
+  //         expect(result.body.message).toBe('This article doesn\'t exist');
+  //       });
+  //     });
   //   });
   // });
 });

@@ -4,6 +4,7 @@ const {
   checkTopicExists,
   checkArticleExists,
 } = require("../utils/articles.utils");
+const format = require('pg-format')
 
 exports.fetchArticle = (articleId) => {
   return db
@@ -90,8 +91,11 @@ exports.fetchAllArticles = (
   );
 };
 
-exports.fetchCommentsForArticle = (articleId, sortBy = 'created_at', order = 'desc') => {
-  
+exports.fetchCommentsForArticle = (
+  articleId,
+  sortBy = "created_at",
+  order = "desc"
+) => {
   const validSorts = ["created_at", "votes", "author", "article_id"];
   if (!validSorts.includes(sortBy)) {
     return Promise.reject({ status: 400, message: "Invalid sort query" });
@@ -103,8 +107,40 @@ exports.fetchCommentsForArticle = (articleId, sortBy = 'created_at', order = 'de
 
   return Promise.all([
     checkArticle,
-    db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY ${sortBy} ${order}`, [articleId]),
+    db.query(
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY ${sortBy} ${order}`,
+      [articleId]
+    ),
   ]).then((result) => {
     return result[1].rows;
   });
 };
+
+exports.updateArticle = (articleId, propertiesToUpdate) => {
+  let sets = [];
+
+  for (let key in propertiesToUpdate) {
+    console.log(format(`%I = %L`, key, propertiesToUpdate[key]))
+    sets.push(format(`%I = %L`, key, propertiesToUpdate[key]));
+  }
+
+  let setStrings = sets.join(",");
+  // console.log(sets)
+
+  const query = format(
+    `UPDATE articles SET %s WHERE article_id = %L`,
+    setStrings,
+    articleId
+  );
+  // console.log(query)
+
+  // return db.query().then((result) => {
+  //   const articleToUpdate = result.body.articles.find((article) => {
+  //     return article.article_id == articleId;
+  //   });
+  // });
+};
+
+`UPDATE articles
+SET column1 = value1, column2 = value2, ...
+WHERE article_id = [$ articleId];`;
