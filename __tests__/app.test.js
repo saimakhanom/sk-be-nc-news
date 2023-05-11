@@ -88,6 +88,83 @@ describe("/api/articles/:article_id", () => {
       });
     });
   });
+
+  describe("PATCH:", () => {
+    describe("status: 200", () => {
+      test("should not update user if no req body supplied", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send()
+          .expect(200)
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09 21:11:00",
+              votes: 100,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body).toMatchObject(expectedResponse);
+          });
+      });
+      test("responds with the updated article object", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            author: "icellusedkars",
+          })
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "icellusedkars",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09 21:11:00",
+              votes: 100,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body).toMatchObject(expectedResponse);
+          });
+      });
+
+      test("should update more than one field if specified", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            author: "icellusedkars",
+          })
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "icellusedkars",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09 21:11:00",
+              votes: 100,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body).toMatchObject(expectedResponse);
+          });
+      });
+    });
+    describe("status: 400", () => {
+      test("should not update invalid article fields", () => {
+        
+      });
+      test("invalid article_id", () => {});
+    });
+    describe("status: 404", () => {
+      test("valid but non-existent article_id", () => {});
+    });
+  });
 });
 
 describe("/api/articles", () => {
@@ -283,8 +360,8 @@ describe("/api/articles/:article_id/comments", () => {
           .expect(200)
           .then((result) => {
             const comments = result.body.comments;
-            expect(comments[0].article_id).toBe(3)
-            expect(comments[1].article_id).toBe(3)
+            expect(comments[0].article_id).toBe(3);
+            expect(comments[1].article_id).toBe(3);
             expect(comments.length).toBe(2);
           });
       });
@@ -296,7 +373,7 @@ describe("/api/articles/:article_id/comments", () => {
           .then((result) => {
             const comments = result.body.comments;
             comments.forEach((comment) => {
-              expect(comment.article_id).toBe(3)
+              expect(comment.article_id).toBe(3);
               expect(comment).toHaveProperty("comment_id");
               expect(comment).toHaveProperty("votes");
               expect(comment).toHaveProperty("created_at");
@@ -357,7 +434,7 @@ describe("/api/articles/:article_id/comments", () => {
           });
       });
     });
-    describe('status: 404', () => {
+    describe("status: 404", () => {
       test("valid but non-existent article_id", () => {
         return request(app)
           .get("/api/articles/3000/comments")
