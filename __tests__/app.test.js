@@ -460,6 +460,38 @@ describe("/api/articles/:article_id/comments", () => {
   });
 });
 
+describe("/api/comments/:comment_id", () => {
+  describe("DELETE:", () => {
+    describe("status: 204", () => {
+      test("deletes comment by given comment_id", () => {
+        return request(app).delete("/api/comments/1").expect(204);
+      });
+    });
+
+    describe("status: 400", () => {
+      test("invalid comment_id", () => {
+        return request(app)
+          .delete("/api/comments/nonsense")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+
+    describe("status: 404", () => {
+      test("valid but non-existent comment_id", () => {
+        return request(app)
+          .delete("/api/comments/1000")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This comment doesn't exist");
+          });
+      });
+    });
+  });
+});
+
 describe('/api/users', () => {
   describe('GET:', () => {
     describe('status: 200', () => {
@@ -479,6 +511,7 @@ describe('/api/users', () => {
         .then((response) => {
           const users = response.body.users;
           users.forEach((user) => {
+            expect(users.length).toBe(4);
             expect(user).toHaveProperty("username");
             expect(user).toHaveProperty("name");
             expect(user).toHaveProperty("avatar_url");

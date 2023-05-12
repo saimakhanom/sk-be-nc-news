@@ -3,8 +3,8 @@ const {
   checkAuthorExists,
   checkTopicExists,
   checkArticleExists,
-  } = require("../utils/articles.utils");
-const format = require('pg-format');
+} = require("../utils/articles.utils");
+const format = require("pg-format");
 const { createRef, formatComments } = require("../utils/seed.utils");
 
 exports.fetchArticle = (articleId) => {
@@ -24,6 +24,7 @@ exports.fetchArticle = (articleId) => {
         });
       } else {
         return result.rows[0];
+
       }
     });
 };
@@ -117,47 +118,96 @@ exports.fetchCommentsForArticle = (
   });
 };
 
-
-
-
-
-
-
 exports.postComment = (reqBody, articleId) => {
   if (!reqBody.username || !reqBody.body) {
-    return Promise.reject({code: '22P02'})
+    return Promise.reject({ status: 400, message: 'Bad request' });
+  }
+
+  const checkArticle = checkArticleExists(articleId);
+  const queryPromise = db
+    .query(`SELECT * FROM articles;`)
+    .then(({ rows: articleRows }) => {
+      reqBody.created_at = Date.now();
+      reqBody.article_id = articleId;
+      reqBody.author = reqBody.username;
+
+      const articleIdLookup = createRef(articleRows, "title", "article_id");
+      const formattedCommentData = formatComments([reqBody], articleIdLookup);
+      const insertCommentsQueryStr = format(
+        "INSERT INTO comments (body, author, article_id, votes, created_at) VALUES %L RETURNING *;",
+        formattedCommentData.map(
+          ({ body, author, article_id, votes = 0, created_at }) => [
+            body,
+            author,
+            article_id,
+            votes,
+            created_at,
+          ]
+        )
+      );
+
+      return db.query(insertCommentsQueryStr).then((result) => {
+        return result.rows[0];
+      });
+    });
+
+  return Promise.all([checkArticle, queryPromise]).then((result) => {
+    return result[1];
+  });
+};
+
+exports.updateArticle = (articleId, propertiesToUpdate) => {
+  const keysToUpdate = Object.keys(propertiesToUpdate)
+  const keysAllowedUpdate = ['body', 'votes', 'article_img_url', 'topic', 'title', 'inc_votes']
+  if (keysToUpdate.length === 0) {
+    return Promise.reject({ status: 400, message: 'Bad request' });
+  }
+
+  for (let key of keysToUpdate) {
+    if (!keysAllowedUpdate.includes(key)) {
+      return Promise.reject({ status: 400, message: 'Bad request' });
+    }
   }
 
   const checkArticle = checkArticleExists(articleId)
-  const queryPromise = db.query(`SELECT * FROM articles;`).then(({ rows: articleRows }) => {
+  const queryPromise = db.query(`SELECT * FROM articles`)
+  .then((result) => {
+    const articles = result.rows
+    const articleKeys = Object.keys(articles[0])
+      articleKeys.push('inc_votes')
+      
+      for (let key in propertiesToUpdate) {
+        if (!articleKeys.includes(key)) {
+          return Promise.reject({ status: 400, message: 'Bad request' })
+        }
+      }
+      
+      if (Object.keys(propertiesToUpdate).includes('inc_votes')) {
+        const article = articles.find((article) => {
+          return article.article_id == articleId
+        })
+        propertiesToUpdate.votes = article.votes + propertiesToUpdate.inc_votes
+        delete propertiesToUpdate.inc_votes
+      }
 
-    reqBody.created_at = Date.now();
-    reqBody.article_id = articleId;
-    reqBody.author = reqBody.username;
-
-    const articleIdLookup = createRef(articleRows, "title", "article_id");
-        const formattedCommentData = formatComments([reqBody], articleIdLookup);
-        const insertCommentsQueryStr = format(
-          "INSERT INTO comments (body, author, article_id, votes, created_at) VALUES %L RETURNING *;",
-          formattedCommentData.map(
-            ({ body, author, article_id, votes = 0, created_at }) => [
-              body,
-              author,
-              article_id,
-              votes,
-              created_at,
-            ]
-          )
-        );
-  
-    return db.query(insertCommentsQueryStr).then((result) => {
-      return result.rows[0];
-    });
+      let sets = [];
+      for (let key in propertiesToUpdate) {
+        sets.push(format(`%I = %L`, key, propertiesToUpdate[key]));
+      }
+      let setStrings = sets.join(",");
+      const query = format(
+        `UPDATE articles SET %s WHERE article_id = %L RETURNING *;`,
+        setStrings,
+        articleId
+      );
     
-  })
-  
+      return db.query(query)
+  }).then((result) => {
+    return result.rows[0];
+  }); 
+
   return Promise.all([checkArticle, queryPromise]).then((result) => {
-   return result[1]
+    return result[1]
   })
 
 };
