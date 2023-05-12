@@ -119,7 +119,7 @@ exports.fetchCommentsForArticle = (
 
 exports.postComment = (reqBody, articleId) => {
   if (!reqBody.username || !reqBody.body) {
-    return Promise.reject({ code: "22P02" });
+    return Promise.reject({ status: 400, message: 'Bad request' });
   }
 
   const checkArticle = checkArticleExists(articleId);
@@ -157,7 +157,7 @@ exports.postComment = (reqBody, articleId) => {
 
 exports.updateArticle = (articleId, propertiesToUpdate) => {
   if (Object.keys(propertiesToUpdate).length === 0) {
-    return Promise.reject({ code: "22P02" });
+    return Promise.reject({ status: 400, message: 'Bad request' });
   }
 
   const checkArticle = checkArticleExists(articleId)
@@ -169,7 +169,7 @@ exports.updateArticle = (articleId, propertiesToUpdate) => {
       
       for (let key in propertiesToUpdate) {
         if (!articleKeys.includes(key)) {
-          return Promise.reject({ code: "22P02" })
+          return Promise.reject({ status: 400, message: 'Bad request' })
         }
       }
       
