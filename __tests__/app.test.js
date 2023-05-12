@@ -459,3 +459,32 @@ describe("/api/articles/:article_id/comments", () => {
     });
   });
 });
+
+describe('/api/users', () => {
+  describe('GET:', () => {
+    describe('status: 200', () => {
+      test('responds with array of users', () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          const users = response.body.users;
+          expect(users.length).toBe(4);
+        });
+      });
+      test('each user has required properties', () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          const users = response.body.users;
+          users.forEach((user) => {
+            expect(user).toHaveProperty("username");
+            expect(user).toHaveProperty("name");
+            expect(user).toHaveProperty("avatar_url");
+          });
+        });
+      });
+    });
+  });
+});
