@@ -95,15 +95,15 @@ describe("/api/articles/:article_id", () => {
         return request(app)
           .patch("/api/articles/1")
           .send({
-            author: "icellusedkars",
+            title: "This is a new title",
           })
           .expect(200)
           .then((result) => {
             const expectedResponse = {
               article_id: 1,
-              title: "Living in the shadow of a great man",
+              title: "This is a new title",
               topic: "mitch",
-              author: "icellusedkars",
+              author: "butter_bridge",
               body: "I find this existence challenging",
               created_at: "2020-07-09T20:11:00.000Z",
               votes: 100,
@@ -118,8 +118,8 @@ describe("/api/articles/:article_id", () => {
         return request(app)
           .patch("/api/articles/1")
           .send({
-            author: "icellusedkars",
             title: "This is a new title",
+            body: 'This is a new body'
           })
           .expect(200)
           .then((result) => {
@@ -127,8 +127,8 @@ describe("/api/articles/:article_id", () => {
               article_id: 1,
               title: "This is a new title",
               topic: "mitch",
-              author: "icellusedkars",
-              body: "I find this existence challenging",
+              author: "butter_bridge",
+              body: 'This is a new body',
               created_at: "2020-07-09T20:11:00.000Z",
               votes: 100,
               article_img_url:
@@ -207,20 +207,65 @@ describe("/api/articles/:article_id", () => {
         return request(app)
           .patch("/api/articles/nonsense")
           .send({
-            author: "icellusedkars",
+            inc_votes: -5
           })
           .expect(400)
           .then((result) => {
             expect(result.body.message).toBe("Bad request");
           });
       });
+      test('should not update votes if inc_votes is not an int', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            inc_votes: 'test'
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update article_id', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            article_id: 2000
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update author', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            author: 'icellusedkars'
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update created_at', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            created_at: Date.now()
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      
     });
     describe("status: 404", () => {
       test("valid but non-existent article_id", () => {
         return request(app)
           .patch("/api/articles/9000")
           .send({
-            author: "icellusedkars",
+            inc_votes: -5
           })
           .expect(404)
           .then((result) => {

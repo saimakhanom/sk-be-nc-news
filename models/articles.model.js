@@ -24,6 +24,7 @@ exports.fetchArticle = (articleId) => {
         });
       } else {
         return result.rows[0];
+
       }
     });
 };
@@ -156,8 +157,16 @@ exports.postComment = (reqBody, articleId) => {
 };
 
 exports.updateArticle = (articleId, propertiesToUpdate) => {
-  if (Object.keys(propertiesToUpdate).length === 0) {
+  const keysToUpdate = Object.keys(propertiesToUpdate)
+  const keysAllowedUpdate = ['body', 'votes', 'article_img_url', 'topic', 'title', 'inc_votes']
+  if (keysToUpdate.length === 0) {
     return Promise.reject({ status: 400, message: 'Bad request' });
+  }
+
+  for (let key of keysToUpdate) {
+    if (!keysAllowedUpdate.includes(key)) {
+      return Promise.reject({ status: 400, message: 'Bad request' });
+    }
   }
 
   const checkArticle = checkArticleExists(articleId)
