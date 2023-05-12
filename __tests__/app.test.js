@@ -346,7 +346,7 @@ describe("/api/articles", () => {
       });
 
       describe("query by: ", () => {
-        test("author", () => {
+        test("author", () => { 
           return request(app)
             .get("/api/articles?author=butter_bridge")
             .expect(200)
@@ -566,7 +566,7 @@ describe("/api/articles/:article_id/comments", () => {
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment;
+            const response = result.body.comment
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -574,21 +574,21 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at");
+            expect(response).toHaveProperty("created_at")
             expect(response).toMatchObject(expectedResponse);
           });
       });
-      test("additional properties in req body are ignored", () => {
+      test('additional properties in req body are ignored', () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({
             username: "icellusedkars",
             body: "This is the best comment ever written!",
-            test: "a test property",
+            test: 'a test property'
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment;
+            const response = result.body.comment
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -596,7 +596,7 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at");
+            expect(response).toHaveProperty("created_at")
             expect(response).toMatchObject(expectedResponse);
           });
       });
@@ -673,6 +673,36 @@ describe("/api/comments/:comment_id", () => {
           .then((result) => {
             expect(result.body.message).toBe("This comment doesn't exist");
           });
+      });
+    });
+  });
+});
+
+describe('/api/users', () => {
+  describe('GET:', () => {
+    describe('status: 200', () => {
+      test('responds with array of users', () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          const users = response.body.users;
+          expect(users.length).toBe(4);
+        });
+      });
+      test('each user has required properties', () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          const users = response.body.users;
+          users.forEach((user) => {
+            expect(users.length).toBe(4);
+            expect(user).toHaveProperty("username");
+            expect(user).toHaveProperty("name");
+            expect(user).toHaveProperty("avatar_url");
+          });
+        });
       });
     });
   });
