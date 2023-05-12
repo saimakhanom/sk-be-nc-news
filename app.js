@@ -1,21 +1,27 @@
 const express = require("express");
 const { getAllTopics } = require("./controllers/topics.controllers");
 const { getEndpoints } = require("./controllers/app.controller");
-const { getArticle, getAllArticles, getCommentsForArticle, postCommentForArticle } = require("./controllers/articles.controller");
 const { deleteComment } = require("./controllers/comments.controller");
+const { getArticle, getAllArticles, getCommentsForArticle, postCommentForArticle, patchArticle } = require("./controllers/articles.controller");
 
 const app = express();
 app.use(express.json())
 
+// GET
 app.get("/api", getEndpoints);
 app.get("/api/topics", getAllTopics);
 app.get('/api/articles', getAllArticles)
 app.get("/api/articles/:article_id", getArticle);
 app.get('/api/articles/:article_id/comments', getCommentsForArticle)
 
+// POST
 app.post('/api/articles/:article_id/comments', postCommentForArticle)
 
+// DELETE
 app.delete('/api/comments/:comment_id', deleteComment)
+
+// PATCH
+app.patch('/api/articles/:article_id', patchArticle)
 
 // error handlers
 app.use((err, req, res, next) => {
