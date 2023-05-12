@@ -88,6 +88,192 @@ describe("/api/articles/:article_id", () => {
       });
     });
   });
+
+  describe("PATCH:", () => {
+    describe("status: 200", () => {
+      test("responds with the updated article object", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            title: "This is a new title",
+          })
+          .expect(200)
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "This is a new title",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 100,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body.article).toMatchObject(expectedResponse);
+          });
+      });
+
+      test("should update more than one field if specified", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            title: "This is a new title",
+            body: 'This is a new body'
+          })
+          .expect(200)
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "This is a new title",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: 'This is a new body',
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 100,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body.article).toMatchObject(expectedResponse);
+        });
+      });
+      test("should increase votes by positive int specified", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            inc_votes: 5
+          })
+          .expect(200)
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 105,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body.article).toMatchObject(expectedResponse);
+          });
+      });
+      test("should decrease votes by negative int specified", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            inc_votes: -5
+          })
+          .expect(200)
+          .then((result) => {
+            const expectedResponse = {
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 95,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            };
+            expect(result.body.article).toMatchObject(expectedResponse);
+          });
+        });
+      });
+    describe("status: 400", () => {
+      test("should not update user if no req body supplied", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send()
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test("should not update invalid article fields", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            test: "test",
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test("invalid article_id", () => {
+        return request(app)
+          .patch("/api/articles/nonsense")
+          .send({
+            inc_votes: -5
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update votes if inc_votes is not an int', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            inc_votes: 'test'
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update article_id', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            article_id: 2000
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update author', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            author: 'icellusedkars'
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      test('should not update created_at', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            created_at: Date.now()
+          })
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+      
+    });
+    describe("status: 404", () => {
+      test("valid but non-existent article_id", () => {
+        return request(app)
+          .patch("/api/articles/9000")
+          .send({
+            inc_votes: -5
+          })
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This article doesn't exist");
+          });
+      });
+    });
+  });
 });
 
 describe("/api/articles", () => {
@@ -380,7 +566,7 @@ describe("/api/articles/:article_id/comments", () => {
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment
+            const response = result.body.comment;
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -388,21 +574,21 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at")
+            expect(response).toHaveProperty("created_at");
             expect(response).toMatchObject(expectedResponse);
           });
       });
-      test('additional properties in req body are ignored', () => {
+      test("additional properties in req body are ignored", () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({
             username: "icellusedkars",
             body: "This is the best comment ever written!",
-            test: 'a test property'
+            test: "a test property",
           })
           .expect(201)
           .then((result) => {
-            const response = result.body.comment
+            const response = result.body.comment;
             const expectedResponse = {
               comment_id: 19,
               body: "This is the best comment ever written!",
@@ -410,7 +596,7 @@ describe("/api/articles/:article_id/comments", () => {
               votes: 0,
               author: "icellusedkars",
             };
-            expect(response).toHaveProperty("created_at")
+            expect(response).toHaveProperty("created_at");
             expect(response).toMatchObject(expectedResponse);
           });
       });
