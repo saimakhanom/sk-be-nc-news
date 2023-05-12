@@ -645,3 +645,35 @@ describe("/api/articles/:article_id/comments", () => {
     });
   });
 });
+
+describe("/api/comments/:comment_id", () => {
+  describe("DELETE:", () => {
+    describe("status: 204", () => {
+      test("deletes comment by given comment_id", () => {
+        return request(app).delete("/api/comments/1").expect(204);
+      });
+    });
+
+    describe("status: 400", () => {
+      test("invalid comment_id", () => {
+        return request(app)
+          .delete("/api/comments/nonsense")
+          .expect(400)
+          .then((result) => {
+            expect(result.body.message).toBe("Bad request");
+          });
+      });
+    });
+
+    describe("status: 404", () => {
+      test("valid but non-existent comment_id", () => {
+        return request(app)
+          .delete("/api/comments/1000")
+          .expect(404)
+          .then((result) => {
+            expect(result.body.message).toBe("This comment doesn't exist");
+          });
+      });
+    });
+  });
+});
