@@ -160,7 +160,7 @@ describe("/api/articles", () => {
       });
 
       describe("query by: ", () => {
-        test("author", () => {
+        test("author", () => { 
           return request(app)
             .get("/api/articles?author=butter_bridge")
             .expect(200)
