@@ -5,6 +5,7 @@ const { handlePSQLErrors, handleRequestErrors, handleServerErrors } = require(".
 
 const app = express();
 app.use(express.json())
+app.use(cors())
 
 // routes
 app.use("/api", apiRouter);
