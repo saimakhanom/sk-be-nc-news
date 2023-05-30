@@ -1,52 +1,19 @@
 const express = require("express");
 const cors = require('cors');
-const { getAllTopics } = require("./controllers/topics.controllers");
-const { getEndpoints } = require("./controllers/app.controller");
-const { getUsers } = require("./controllers/users.controller");
-const { deleteComment } = require("./controllers/comments.controller");
-const { getArticle, getAllArticles, getCommentsForArticle, postCommentForArticle, patchArticle } = require("./controllers/articles.controller");
+const apiRouter = require("./routes/api-router");
+const { handlePSQLErrors, handleRequestErrors, handleServerErrors } = require("./error-handlers/error-handlers");
 
 const app = express();
 app.use(express.json())
-app.use(cors());
 
-// GET
-app.get("/api", getEndpoints);
-app.get('/api/users', getUsers)
-app.get("/api/topics", getAllTopics);
-app.get('/api/articles', getAllArticles)
-app.get("/api/articles/:article_id", getArticle);
-app.get('/api/articles/:article_id/comments', getCommentsForArticle)
-
-// POST
-app.post('/api/articles/:article_id/comments', postCommentForArticle)
-
-// DELETE
-app.delete('/api/comments/:comment_id', deleteComment)
-
-// PATCH
-app.patch('/api/articles/:article_id', patchArticle)
+// routes
+app.use("/api", apiRouter);
 
 // error handlers
-app.use((err, req, res, next) => {
-  if (err.code === "22P02") {
-    res.status(400).send({ message: "Bad request" });
-  } else {
-    next(err);
-  }
-});
+app.use(handlePSQLErrors);
 
-app.use((err, req, res, next) => {
-  if (err.status && err.message) {
-    res.status(err.status).send({ message: err.message });
-  } else {
-    next(err);
-  }
-});
+app.use(handleRequestErrors);
 
-app.use((err, req, res, next) => {
-  console.log({err})
-  res.status(500).send({ message: "Server error!" });
-});
+app.use(handleServerErrors);
 
 module.exports = app;
