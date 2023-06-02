@@ -36,7 +36,7 @@ exports.fetchAllArticles = (
   topic
 ) => {
   // validate sort_by and order
-  const validSorts = ["created_at", "votes", "title", "author", "topic"];
+  const validSorts = ["created_at", "votes", "title", "author", "topic", "comment_count"];
   if (!validSorts.includes(sortBy)) {
     return Promise.reject({ status: 400, message: "Invalid sort query" });
   } else if (order !== "asc" && order !== "desc") {
